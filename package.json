@@ -1,0 +1,29 @@
+{
+	"name": "feri-my-stackoverflow",
+	"version": "0.0.1",
+	"private": false,
+	"license": "UNLICENSED",
+	"scripts": {
+		"start:dev": "cross-env NODE_ENV=development node ./bin/www",
+		"dev": "yarn start:dev",
+		"start:prod": "cross-env NODE_ENV=production node ./bin/www",
+		"prod": "yarn start:prod"
+	},
+	"dependencies": {
+		"compression": "^1.7.4",
+		"cookie-parser": "~1.4.3",
+		"custom-env": "^1.0.0",
+		"debug": "~2.6.9",
+		"express": "~4.16.0",
+		"hbs": "~4.0.1",
+		"helmet": "^3.16.0",
+		"http-errors": "~1.6.2",
+		"less-middleware": "~2.2.1",
+		"mongoose": "^5.5.1",
+		"morgan": "~1.9.0"
+	},
+	"devDependencies": {
+		"cross-env": "^5.2.0",
+		"nodemon": "^1.18.11"
+	}
+}
