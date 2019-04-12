@@ -6,39 +6,26 @@
 console.log("Loading", process.env.NODE_ENV, "environment...\n.env." + process.env.NODE_ENV);
 require("custom-env").env(process.env.NODE_ENV);
 
-const createError = require("http-errors"); // handles errors
 const express = require("express"); // express framework
 const path = require("path"); // node path module
-const cookieParser = require("cookie-parser"); // parses website cookies
-const lessMiddleware = require("less-middleware"); // enables us to use less instead of css
 const logger = require("morgan"); // morgan express request logger
 const mongoose = require("mongoose"); // mongoose odm for mongodb
 const compression = require("compression"); //compresses http response
 const helmet = require("helmet"); // provides basic security
+const bodyParser = require("body-parser");
 
 // import routing
-const indexRouter = require("./routes/index");
 const apiRouter = require("./routes/api");
 
 // instantitate our app
 const app = express();
 
-// view engine setup
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "hbs");
-
 // set logger
 app.use(logger("dev"));
 
 // parses body of the request
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-// setup cookie parser
-app.use(cookieParser());
-
-// setup less loader
-app.use(lessMiddleware(path.join(__dirname, "public")));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // serve static files from ./public folder
 app.use(express.static(path.join(__dirname, "public")));
@@ -50,13 +37,14 @@ app.use(compression());
 app.use(helmet());
 
 // setup routing
-app.use("/", indexRouter);
 app.use("/api", apiRouter);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-	next(createError(404));
-});
+if (process.env.NODE_ENV === "production") {
+	app.use(express.static("client/build"));
+	app.get("*", (req, res) => {
+		res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+	});
+}
 
 // error handler
 app.use(function(err, req, res, next) {

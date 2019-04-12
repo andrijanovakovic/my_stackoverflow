@@ -1,0 +1,43 @@
+{
+	"name": "my-stackoverflow-frontend",
+	"version": "0.0.1",
+	"description": "my-stackoverflow-frontend",
+	"private": false,
+	"author": "Andrija Novaković <andr.nvk@gmail.com>",
+	"license": "ISC",
+	"dependencies": {
+		"axios": "^0.18.0",
+		"bootstrap": "^4.3.1",
+		"lodash": "^4.17.11",
+		"moment": "^2.22.2",
+		"react": "^16.6.0",
+		"react-bootstrap": "^1.0.0-beta.6",
+		"react-dom": "^16.6.0",
+		"react-redux": "^5.1.0",
+		"react-router-dom": "^4.3.1",
+		"react-scripts": "1.1.5",
+		"redux": "^4.0.1",
+		"redux-thunk": "^2.3.0"
+	},
+	"scripts": {
+		"dev": "yarn start",
+		"start": "react-scripts start",
+		"build": "react-scripts build",
+		"test": "react-scripts test",
+		"eject": "react-scripts eject"
+	},
+	"eslintConfig": {
+		"extends": "react-app"
+	},
+	"browserslist": [
+		">0.2%",
+		"not dead",
+		"not ie <= 11",
+		"not op_mini all"
+	],
+	"proxy": {
+		"/api/*": {
+			"target": "http://localhost:5555"
+		}
+	}
+}
