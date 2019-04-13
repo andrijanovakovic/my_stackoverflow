@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import Jumbotron from "react-bootstrap/Jumbotron";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import Spinner from "react-bootstrap/Spinner";
 import "../css/SignUp.css";
 import FormErrors from "./FormErrors";
 import { register_user } from "../actions/AuthActions";
@@ -11,7 +12,7 @@ class SignUp extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			formErrors: { email: "", password: "", username: "", passwordValid: "" },
+			formErrors: { data: "", email: "", password: "", username: "", passwordValid: "" },
 			emailValid: false,
 			passwordValid: false,
 			usernameValid: false,
@@ -20,12 +21,26 @@ class SignUp extends Component {
 		};
 	}
 
+	componentWillReceiveProps(nextProps) {
+		if (nextProps.user_sign_up_data) {
+			if (nextProps.user_sign_up_data.success === false) {
+				let { formErrors } = this.state;
+				formErrors.data = nextProps.user_sign_up_data.reason;
+				this.setState({ formErrors });
+			}
+		}
+	}
+
 	submit_data() {
-		this.props.register_user({
-			username: this.state.username,
-			password: this.state.password,
-			email: this.state.email,
-		});
+		this.props.register_user(
+			{
+				username: this.state.username,
+				password: this.state.password,
+				password_repeat: this.state.password_repeat,
+				email: this.state.email,
+			},
+			this.props.history,
+		);
 	}
 
 	validateField(fieldName, value) {
@@ -103,19 +118,34 @@ class SignUp extends Component {
 					<Form style={{ width: "70%" }}>
 						<Form.Group controlId="formBasicUsername">
 							<Form.Label>Username</Form.Label>
-							<Form.Control type="text" placeholder="Username" ref="username" name="username" onChange={(event) => this.handleUserInput(event)} />
+							<Form.Control
+								required
+								type="text"
+								placeholder="Username"
+								ref="username"
+								name="username"
+								onChange={(event) => this.handleUserInput(event)}
+							/>
 							<Form.Text className="text-muted">Username should be at least 8 characters long.</Form.Text>
 						</Form.Group>
 
 						<Form.Group controlId="formBasicEmail">
 							<Form.Label>Email address</Form.Label>
-							<Form.Control type="email" placeholder="Email" ref="email" name="email" onChange={(event) => this.handleUserInput(event)} />
+							<Form.Control
+								required
+								type="email"
+								placeholder="Email"
+								ref="email"
+								name="email"
+								onChange={(event) => this.handleUserInput(event)}
+							/>
 							<Form.Text className="text-muted">We'll never share your email with anyone else.</Form.Text>
 						</Form.Group>
 
 						<Form.Group controlId="formBasicPassword">
 							<Form.Label>Password</Form.Label>
 							<Form.Control
+								required
 								type="password"
 								placeholder="Password"
 								ref="password"
@@ -128,6 +158,7 @@ class SignUp extends Component {
 						<Form.Group controlId="formBasicPasswordRepeat">
 							<Form.Label>Password</Form.Label>
 							<Form.Control
+								required
 								type="password"
 								placeholder="Repeat password"
 								ref="password_repeat"
@@ -138,7 +169,10 @@ class SignUp extends Component {
 						</Form.Group>
 
 						<Button variant="light" style={{ width: "100%" }} disabled={!this.state.formValid} onClick={() => this.submit_data()}>
-							Submit
+							{this.props.user_sign_up_loading ? (
+								<Spinner as="span" animation="grow" size="sm" role="status" aria-hidden="true" style={{ marginRight: 5 }} />
+							) : null}
+							Sign up!
 						</Button>
 					</Form>
 				</div>
@@ -148,7 +182,12 @@ class SignUp extends Component {
 }
 
 const mapStateToProps = (state) => {
-	return {};
+	return {
+		user_authenticated: state.auth.user_authenticated,
+		user_sign_up_loading: state.auth.user_sign_up_loading,
+		user_sign_up_data: state.auth.user_sign_up_data,
+		user_sign_up_error: state.auth.user_sign_up_error,
+	};
 };
 
 const mapDispatchToProps = { register_user };
