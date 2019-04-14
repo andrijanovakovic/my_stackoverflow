@@ -1,19 +1,30 @@
-const jwt = require("jsonwebtoken");
+/**
+ * this middleware checks if there is a token in the request headers
+ */
 
-// jwt secret
-const jwt_secret_key = process.env.JWT_SECRET_KEY;
+const jwt = require("../middleware/jwt");
 
 module.exports = (req, res, next) => {
-	try {
-		// will verify and decode and return decoded values
-		const token = req.headers.authorization.split(" ")[1];
-		const decoded_token = jwt.verify(token, jwt_secret_key);
-		req.user_data = decoded_token;
-		next();
-	} catch (error) {
+	// get token from request headers
+	const token = req.headers.authorization.split(" ")[1];
+
+	// decode token to get token user email
+	const token_data = jwt.decode(token);
+
+	// try to verify token
+	const jwt_verify_result = jwt.verify(token, { subject: token_data.payload.email });
+
+	// if verification failed
+	if (jwt_verify_result === false) {
 		return res.status(401).json({
 			success: false,
 			reason: "Auth failed!",
 		});
 	}
+
+	// set user_data to result of verify
+	req.user_data = jwt_verify_result;
+
+	// proceed
+	next();
 };

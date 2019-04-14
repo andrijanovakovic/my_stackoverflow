@@ -1,19 +1,17 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
+const jwt = require("../middleware/jwt");
 const auth_required = require("../middleware/check_auth");
 
 const router = express.Router();
 
 // models
 const User = require("../db/models/user");
+const Question = require("../db/models/question");
 
 // generate salt rounds number for bcrypt
 const salt_rounds = bcrypt.genSaltSync(Number(process.env.BCRYPT_SALT_ROUNDS));
-
-// jwt secret
-const jwt_secret_key = process.env.JWT_SECRET_KEY;
 
 /** USER ROUTES START ============================================================================================================================================================================== */
 // user sign up
@@ -28,7 +26,6 @@ router.post("/user/sign_up", (req, res) => {
 	let email_valid = email.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i) ? true : false;
 
 	if (!(username_valid && password_valid && password_repeat_valid && email_valid)) {
-		console.log("Data invalid.");
 		return res.status(200).json({
 			success: false,
 			reason: "Data invalid",
@@ -37,7 +34,7 @@ router.post("/user/sign_up", (req, res) => {
 		// first check if the username is available
 		User.findOne({ username: username }, (err, doc) => {
 			if (err) {
-				console.log(err);
+				console.error(err);
 				return res.status(500).json({
 					success: false,
 					reason: "Error occured while trying to checkout username availability.",
@@ -51,7 +48,7 @@ router.post("/user/sign_up", (req, res) => {
 			} else {
 				User.findOne({ email: email }, (err, doc) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return res.status(500).json({
 							success: false,
 							reason: "Error occured while trying to checkout email availability.",
@@ -117,7 +114,7 @@ router.post("/user/sign_in", (req, res) => {
 			// find user by identifier
 			User.findOne({ $or: [{ username: identifier }, { email: identifier }] }, (err, user) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return res.status(500).json({
 						success: false,
 						reason: "Error occured while trying to find user by identifier.",
@@ -131,7 +128,7 @@ router.post("/user/sign_in", (req, res) => {
 				} else {
 					bcrypt.compare(password, user.password, (err, compare_result) => {
 						if (err) {
-							console.log(err);
+							console.error(err);
 							res.status(500).json({
 								success: false,
 								reason: "Error occured while trying to find user by identifier.",
@@ -148,10 +145,7 @@ router.post("/user/sign_in", (req, res) => {
 										email: user.email,
 										username: user.username,
 									},
-									jwt_secret_key,
-									{
-										expiresIn: 1800000, // 1,800,000 milliseconds = 30 minutes
-									},
+									{ subject: user.email },
 								);
 
 								// send token back to user
@@ -176,6 +170,29 @@ router.post("/user/sign_in", (req, res) => {
 			});
 		}
 	}
+});
+
+// fetch all questions
+router.get("/q/get_questions", (req, res) => {
+	Question.find({}, (error, docs) => {
+		if (error) {
+			res.status(500).json({
+				success: false,
+				reason: "Error while fetching questions from database.",
+				err: error,
+			});
+		}
+		res.status(200).json({
+			questions: docs,
+			success: true,
+		});
+	});
+});
+
+// post question
+router.post("/q/create_question", auth_required, (req, res) => {
+	console.log(req.body);
+	console.log(req.user_data);
 });
 
 module.exports = router;

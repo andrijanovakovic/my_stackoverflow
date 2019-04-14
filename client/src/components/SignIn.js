@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { Redirect } from "react-router-dom";
 import Jumbotron from "react-bootstrap/Jumbotron";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
@@ -17,6 +18,7 @@ class SignIn extends Component {
 			identifier: "",
 			password: "",
 			form_valid: false,
+			redirectToReferrer: false,
 		};
 	}
 
@@ -26,8 +28,6 @@ class SignIn extends Component {
 		if (url_search_params.sign_up_successfull && url_search_params.sign_up_successfull === "true") {
 			this.setState({ jumbotron_title: "Welcome, you sign-up was successfull, you can now sign-in!" });
 		}
-
-		const { from } = this.props.location.state || { from: { pathname: "/" } };
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -36,6 +36,8 @@ class SignIn extends Component {
 				let { formErrors } = this.state;
 				formErrors.data = nextProps.user_sign_in_data.reason;
 				this.setState({ formErrors });
+			} else {
+				this.setState({ redirectToReferrer: true });
 			}
 		}
 	}
@@ -58,10 +60,21 @@ class SignIn extends Component {
 				password: this.state.password,
 			},
 			this.props.history,
+			this.props.location.state || { from: { pathname: "/" } },
 		);
 	}
 
 	render() {
+		let { from } = (this.props.location.state &&
+		this.props.location.state.from &&
+		this.props.location.state.from.pathname &&
+		this.props.location.state.from.pathname.includes("sign_out")
+			? { pathname: "/" }
+			: this.props.location.state) || {
+			from: { pathname: "/" },
+		};
+		let { redirectToReferrer } = this.state;
+		if (redirectToReferrer) return <Redirect to={from ? from : { pathname: "/" }} />;
 		return (
 			<div>
 				<Jumbotron>

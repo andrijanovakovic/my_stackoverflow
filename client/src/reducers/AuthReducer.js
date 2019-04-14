@@ -17,7 +17,8 @@ let initialState = {
 	user_sign_in_data: [],
 	user_sign_in_error: [],
 
-	user_authenticated: false,
+    user_authenticated: false,
+    user_data: []
 };
 
 export default function(state = initialState, action) {

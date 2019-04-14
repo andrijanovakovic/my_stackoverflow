@@ -10,7 +10,8 @@ import CreateQuestion from "./components/CreateQuestion";
 import MyQuestions from "./components/MyQuestions";
 import Nav from "react-bootstrap/Nav";
 import { connect } from "react-redux";
-import PrivateRoute from './components/PrivateRoute';
+import PrivateRoute from "./components/PrivateRoute";
+import { ToastContainer } from "react-toastify";
 
 class App extends Component {
 	render() {
@@ -19,6 +20,17 @@ class App extends Component {
 			<div className="App">
 				<Router>
 					<div>
+						<ToastContainer
+							position="top-center"
+							autoClose={5000}
+							hideProgressBar
+							newestOnTop={false}
+							closeOnClick={false}
+							rtl={false}
+							pauseOnVisibilityChange={false}
+							draggable={false}
+							pauseOnHover={false}
+						/>
 						<Navbar bg="light">
 							<Navbar.Brand href="/">My Stackoverflow</Navbar.Brand>
 							<Nav.Link href="/">Home</Nav.Link>
@@ -32,7 +44,7 @@ class App extends Component {
 							<Navbar.Collapse className="justify-content-end">
 								{user ? (
 									<Navbar.Text>
-										Signed in with: {user.email},{" "}
+										Signed in with {user.email}&nbsp;&nbsp;&nbsp;
 										<a href="/sign_out" onClick={() => localStorage.clear()}>
 											Sign out
 										</a>
@@ -50,9 +62,9 @@ class App extends Component {
 						<Route path="/about/" exact component={About} />
 						<Route path="/sign_in/" exact component={SignIn} />
 						<Route path="/sign_up/" exact component={SignUp} />
-						<PrivateRoute path="/create_question/" exact component={CreateQuestion} />
-						<PrivateRoute path="/my_questions/" exact component={MyQuestions} />
-						{/* <PrivateRoute path="/sign_out/" exact component={SignOut} /> */}
+						<PrivateRoute auth={this.props.user_authenticated} path="/create_question/" component={CreateQuestion} />
+						<PrivateRoute auth={this.props.user_authenticated} path="/my_questions/" exact component={MyQuestions} />
+						<PrivateRoute auth={this.props.user_authenticated} path="/sign_out/" exact component={SignOut} />
 					</div>
 				</Router>
 			</div>

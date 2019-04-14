@@ -9,7 +9,6 @@ require("custom-env").env(process.env.NODE_ENV);
 if (!process.env.NODE_ENV) throw "NODE_ENV missing";
 if (!process.env.DATABASE_URL) throw "DATABASE_URL missing";
 if (!process.env.BCRYPT_SALT_ROUNDS) throw "BCRYPT_SALT_ROUNDS missing";
-if (!process.env.JWT_SECRET_KEY) throw "JWT_SECRET_KEY missing";
 
 const express = require("express"); // express framework
 const path = require("path"); // node path module

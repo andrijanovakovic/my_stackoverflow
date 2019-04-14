@@ -10,7 +10,7 @@ import CombinedReducers from "./reducers/index";
 import axios from "axios";
 import { AUTHENTICATE_USER } from "./types/AuthTypes";
 import jwt_decode from "jwt-decode";
-import { reset_auth_reducer_to_init } from './actions/AuthActions';
+import { reset_auth_reducer_to_init } from "./actions/AuthActions";
 
 const store = createStore(CombinedReducers, {}, applyMiddleware(reduxThunk));
 
@@ -18,28 +18,22 @@ const token = localStorage.getItem("token");
 
 // set axios defaults
 axios.defaults.headers.post["Content-Type"] = "appication/json";
-axios.interceptors.request.use(function(config) {
-	config.headers.Authenticate = `Bearer ${token}`;
-	return config;
-});
+if (token && token !== "" && token !== "null") {
+	axios.defaults.headers.common.authorization = `Bearer ${token}`;
+	store.dispatch({ type: AUTHENTICATE_USER, payload: jwt_decode(token) });
+}
 axios.interceptors.response.use(
 	(response) => {
 		return response;
 	},
 	(error) => {
-		if (error.response) {
-			if (error.response.status === 401) {
-				localStorage.clear();
-				store.dispatch(reset_auth_reducer_to_init()); // ce je UNAUTHORIZED potem logout userja in vrzi na login screen
-			}
+		if (error.response && error.response.status && error.response.status === 401) {
+			localStorage.clear();
+			store.dispatch(reset_auth_reducer_to_init());
 		}
 		return Promise.reject(error);
 	},
 );
-
-if (token) {
-	store.dispatch({ type: AUTHENTICATE_USER, payload: jwt_decode(token) });
-}
 
 ReactDOM.render(
 	<Provider store={store}>

@@ -19,9 +19,6 @@ export const register_user = (userdata, browser_history = null) => {
 			})
 			.then((res) => {
 				dispatch({ type: USER_SIGN_UP_SUCCESS, payload: res.data });
-				if (res.data.success === true && browser_history !== null) {
-					browser_history.push("/sign_in?sign_up_successfull=true");
-				}
 			})
 			.catch((err) => {
 				console.error(err);
@@ -30,7 +27,7 @@ export const register_user = (userdata, browser_history = null) => {
 	};
 };
 
-export const sign_in_user = (userdata, browser_history = null, redirect_to = "/") => {
+export const sign_in_user = (userdata) => {
 	return (dispatch) => {
 		dispatch({ type: USER_SIGN_IN_LOADING });
 		axios
@@ -43,10 +40,7 @@ export const sign_in_user = (userdata, browser_history = null, redirect_to = "/"
 					const token_decoded = jwt_decode(res.data.token);
 					localStorage.setItem("user", JSON.stringify(token_decoded));
 					dispatch({ type: AUTHENTICATE_USER, payload: token_decoded });
-				}
-				dispatch({ type: USER_SIGN_IN_SUCCESS, payload: res.data });
-				if (res.data.success === true && browser_history !== null) {
-					// browser_history.push(redirect_to.pathname && !redirect_to.pathname.includes("sign_out") ? redirect_to.pathname : "/");
+					dispatch({ type: USER_SIGN_IN_SUCCESS, payload: res.data });
 				}
 			})
 			.catch((err) => {
