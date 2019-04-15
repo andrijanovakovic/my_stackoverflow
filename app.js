@@ -3,7 +3,6 @@
  */
 
 // load environment file based on NODE_ENV
-console.log(`Loading '${process.env.NODE_ENV}' environment variables...`);
 require("custom-env").env(process.env.NODE_ENV);
 
 if (!process.env.NODE_ENV) throw "NODE_ENV missing";

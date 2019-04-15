@@ -12,8 +12,16 @@ import Nav from "react-bootstrap/Nav";
 import { connect } from "react-redux";
 import PrivateRoute from "./components/PrivateRoute";
 import { ToastContainer } from "react-toastify";
+import { fetch_current_user } from "./actions/AuthActions";
+import PropTypes from "prop-types";
 
 class App extends Component {
+	componentDidMount() {
+		if (this.props.user_check_required) {
+			this.props.fetch_current_user();
+		}
+	}
+
 	render() {
 		const user = JSON.parse(localStorage.getItem("user"));
 		return (
@@ -75,10 +83,15 @@ class App extends Component {
 const mapStateToProps = (state) => {
 	return {
 		user_authenticated: state.auth.user_authenticated,
+		user_check_required: state.auth.user_check_required,
 	};
 };
 
-const mapDispatchToProps = {};
+const mapDispatchToProps = { fetch_current_user };
+
+App.propTypes = {
+	user_check_required: PropTypes.bool.isRequired,
+};
 
 export default connect(
 	mapStateToProps,

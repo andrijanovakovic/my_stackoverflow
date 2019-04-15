@@ -151,11 +151,6 @@ router.post("/user/sign_in", (req, res) => {
 								// send token back to user
 								return res.status(200).json({
 									success: true,
-									// user: {
-									// 	_id: user._id,
-									// 	email: user.email,
-									// 	username: user.username,
-									// },
 									token: token,
 								});
 							} else {
@@ -170,6 +165,14 @@ router.post("/user/sign_in", (req, res) => {
 			});
 		}
 	}
+});
+
+// just checks if the token is still valid
+router.get("/user/current_user", auth_required, (req, res) => {
+	// if (req.user_data) {
+	// 	return res.status(200).json({ user_data: req.user_data });
+	// }
+	// return res.status(401);
 });
 
 // fetch all questions
@@ -190,9 +193,6 @@ router.get("/q/get_questions", (req, res) => {
 });
 
 // post question
-router.post("/q/create_question", auth_required, (req, res) => {
-	console.log(req.body);
-	console.log(req.user_data);
-});
+router.post("/q/create_question", auth_required, (req, res) => {});
 
 module.exports = router;

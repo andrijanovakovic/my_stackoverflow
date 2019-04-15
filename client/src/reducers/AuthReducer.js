@@ -6,6 +6,9 @@ import {
 	USER_SIGN_IN_LOADING,
 	USER_SIGN_IN_SUCCESS,
 	AUTHENTICATE_USER,
+	FETCH_CURRENT_USER_LOADING,
+	FETCH_CURRENT_USER_SUCCESS,
+	FETCH_CURRENT_USER_ERR,
 } from "../types/AuthTypes";
 
 let initialState = {
@@ -17,8 +20,10 @@ let initialState = {
 	user_sign_in_data: [],
 	user_sign_in_error: [],
 
-    user_authenticated: false,
-    user_data: []
+	user_authenticated: false,
+	user_data: [],
+	user_data_loading: false,
+	user_check_required: true,
 };
 
 export default function(state = initialState, action) {
@@ -40,6 +45,15 @@ export default function(state = initialState, action) {
 			return { ...state, user_authenticated: true };
 		case "AUTH_REDUX_RESET":
 			return initialState;
+
+		case FETCH_CURRENT_USER_LOADING:
+			return { ...state, user_data_loading: true };
+		case FETCH_CURRENT_USER_SUCCESS:
+			return { ...state, user_data_loading: false, user_data: action.payload, user_check_required: false };
+		case FETCH_CURRENT_USER_ERR:
+			localStorage.clear();
+			return { ...state, user_data_loading: false, user_data: [] };
+
 		default:
 			return state;
 	}

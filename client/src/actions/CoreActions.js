@@ -7,7 +7,6 @@ export const get_questions = () => {
 		axios
 			.get("/api/q/get_questions")
 			.then((res) => {
-				console.log(res);
 				dispatch({ type: GET_QUESTIONS_SUCCESS });
 			})
 			.catch((err) => {
@@ -25,7 +24,6 @@ export const create_question = (question) => {
 				question,
 			})
 			.then((res) => {
-				console.log(res);
 				dispatch({ type: GET_QUESTIONS_SUCCESS });
 			})
 			.catch((err) => {
