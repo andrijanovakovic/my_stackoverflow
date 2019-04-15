@@ -19,6 +19,9 @@ import {
 	ACCEPT_ANSWER_FAIL,
 	ACCEPT_ANSWER_LOADING,
 	ACCEPT_ANSWER_SUCCESS,
+	FETCH_MY_QUESTIONS_LOADING,
+	FETCH_MY_QUESTIONS_SUCCESS,
+	FETCH_MY_QUESTIONS_FAIL,
 } from "../types/CoreTypes";
 
 export const all_available_questions = () => {
@@ -32,6 +35,36 @@ export const all_available_questions = () => {
 			.catch((err) => {
 				console.error(err);
 				dispatch({ type: GET_QUESTIONS_ERROR });
+			});
+	};
+};
+
+export const fetch_my_questions = () => {
+	return (dispatch) => {
+		dispatch({ type: FETCH_MY_QUESTIONS_LOADING });
+		axios
+			.get("/api/q/my_questions")
+			.then((res) => {
+				dispatch({ type: FETCH_MY_QUESTIONS_SUCCESS, payload: res.data });
+			})
+			.catch((err) => {
+				console.error(err);
+				dispatch({ type: FETCH_MY_QUESTIONS_FAIL });
+			});
+	};
+};
+
+export const delete_question = (question_id, cb) => {
+	return (dispatch) => {
+		axios
+			.post("/api/q/delete_question", {
+				question_id,
+			})
+			.then((res) => {
+				if (cb) cb();
+			})
+			.catch((err) => {
+				console.error(err);
 			});
 	};
 };
@@ -129,8 +162,8 @@ export const add_comment_to_answer = (answer_id, comment_value, question_id, cb)
 		axios
 			.post("/api/c/add_comment_to_answer", {
 				answer_id,
-                comment_value,
-                question_id,
+				comment_value,
+				question_id,
 			})
 			.then((res) => {
 				console.log(res.data);

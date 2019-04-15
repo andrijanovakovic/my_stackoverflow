@@ -15,6 +15,9 @@ import {
 	ACCEPT_ANSWER_FAIL,
 	ACCEPT_ANSWER_LOADING,
 	ACCEPT_ANSWER_SUCCESS,
+	FETCH_MY_QUESTIONS_LOADING,
+	FETCH_MY_QUESTIONS_SUCCESS,
+	FETCH_MY_QUESTIONS_FAIL,
 } from "../types/CoreTypes";
 
 let initialState = {
@@ -33,6 +36,9 @@ let initialState = {
 	accept_answer_loading: false,
 	accept_answer_data: [],
 	accept_answer_error: [],
+	my_questions_loading: false,
+	my_questions_data: [],
+	my_questions_fail: [],
 };
 
 export default function(state = initialState, action) {
@@ -74,6 +80,13 @@ export default function(state = initialState, action) {
 			return { ...state, accept_answer_data: action.payload, accept_answer_error: [], accept_answer_loading: false };
 		case ACCEPT_ANSWER_FAIL:
 			return { ...state, accept_answer_data: [], accept_answer_error: action.payload, accept_answer_loading: false };
+
+		case FETCH_MY_QUESTIONS_LOADING:
+			return { ...state, my_questions_data: [], my_questions_fail: [], my_questions_loading: true };
+		case FETCH_MY_QUESTIONS_SUCCESS:
+			return { ...state, my_questions_data: action.payload, my_questions_fail: [], my_questions_loading: false };
+		case FETCH_MY_QUESTIONS_FAIL:
+			return { ...state, my_questions_data: [], my_questions_fail: action.payload, my_questions_loading: false };
 
 		default:
 			return state;

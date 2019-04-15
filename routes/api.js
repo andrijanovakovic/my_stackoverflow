@@ -190,6 +190,44 @@ router.get("/q/all_available_questions", (req, res) => {
 	});
 });
 
+// fetch all mine questions
+router.get("/q/my_questions", auth_required, (req, res) => {
+	Question.find({ "user._id": req.user_data._id }, null, { sort: { createdAt: -1 } }, (error, docs) => {
+		if (error) {
+			return res.status(500).json({
+				success: false,
+				reason: "Error while fetching all available questions from database.",
+				err: error,
+			});
+		}
+		return res.status(200).json({
+			questions: docs,
+			success: true,
+		});
+	});
+});
+
+// delete question
+router.post("/q/delete_question", auth_required, (req, res) => {
+	const { question_id } = req.body;
+	Question.findOne({ _id: question_id }, (err, doc) => {
+		if (err) {
+			return res.status(500).json({ success: false, reason: "Error occured while trying to fetch question from database." });
+		} else if (!doc) {
+			return res.status(404).json({ success: false, reason: "Error occured while trying to fetch question from database." });
+		} else if (doc.user._id.toString() !== req.user_data._id) {
+			return res.status(403).json({ success: false, reason: "Only the question owner can delete question." });
+		} else {
+			Question.deleteOne({ _id: question_id }, (err, doc) => {
+				if (err) {
+					return res.status(500).json({ success: false, reason: "Error occured while trying to delete question from database." });
+				}
+				return res.status(200).json({ success: true });
+			});
+		}
+	});
+});
+
 // post question
 router.post("/q/create_question", auth_required, (req, res) => {
 	const { title, description, tags } = req.body.question;
