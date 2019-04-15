@@ -1,0 +1,63 @@
+.react-tags__search input {
+	width: 100% !important;
+	padding: 0.375rem 0.75rem;
+	font-size: 1rem;
+	font-weight: 400;
+	line-height: 1.5;
+	color: #495057;
+	background-color: #fff;
+	background-clip: padding-box;
+	border: 1px solid #ced4da;
+	border-radius: 0.25rem;
+	transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.react-tags__selected-tag {
+	padding: 0.375rem 0.75rem;
+	font-size: 1rem;
+	font-weight: 400;
+	line-height: 1.5;
+	color: #495057;
+	background-color: #fff;
+	background-clip: padding-box;
+	border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    margin-right: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+.react-tags__suggestions {
+	padding: 0.375rem 0.75rem;
+	font-size: 1rem;
+	font-weight: 400;
+	line-height: 1.5;
+	color: #495057;
+	background-color: #ffe;
+	background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-top: 0px;
+    border-radius: 0.25rem;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    list-style-type: none;
+}
+.react-tags__suggestions ul {
+    list-style-type: none !important;
+    padding: 0px !important;
+    margin: 0px !important;
+}
+
+.react-tags__suggestions li {
+    padding: 0px !important;
+    margin: 0px !important;
+    padding: 0.375rem 0.75rem;
+	font-size: 1rem;
+	font-weight: 400;
+	line-height: 1.5;
+	color: #495057;
+	background-color: #fff;
+	background-clip: padding-box;
+    list-style-type: none;
+}
+
+.react-tags__suggestions li:hover {
+	background-color: #ffa;
+}

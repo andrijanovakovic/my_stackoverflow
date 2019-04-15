@@ -9,6 +9,9 @@ const router = express.Router();
 // models
 const User = require("../db/models/user");
 const Question = require("../db/models/question");
+const Tag = require("../db/models/tag");
+const Answer = require("../db/models/answer");
+const Comment = require("../db/models/comment");
 
 // generate salt rounds number for bcrypt
 const salt_rounds = bcrypt.genSaltSync(Number(process.env.BCRYPT_SALT_ROUNDS));
@@ -168,24 +171,19 @@ router.post("/user/sign_in", (req, res) => {
 });
 
 // just checks if the token is still valid
-router.get("/user/current_user", auth_required, (req, res) => {
-	// if (req.user_data) {
-	// 	return res.status(200).json({ user_data: req.user_data });
-	// }
-	// return res.status(401);
-});
+router.get("/user/current_user", auth_required, (req, res) => {});
 
 // fetch all questions
-router.get("/q/get_questions", (req, res) => {
-	Question.find({}, (error, docs) => {
+router.get("/q/all_available_questions", (req, res) => {
+	Question.find({}, null, { sort: { createdAt: -1 } }, (error, docs) => {
 		if (error) {
-			res.status(500).json({
+			return res.status(500).json({
 				success: false,
-				reason: "Error while fetching questions from database.",
+				reason: "Error while fetching all available questions from database.",
 				err: error,
 			});
 		}
-		res.status(200).json({
+		return res.status(200).json({
 			questions: docs,
 			success: true,
 		});
@@ -193,6 +191,221 @@ router.get("/q/get_questions", (req, res) => {
 });
 
 // post question
-router.post("/q/create_question", auth_required, (req, res) => {});
+router.post("/q/create_question", auth_required, (req, res) => {
+	const { title, description, tags } = req.body.question;
+
+	// first insert tags
+	let tag_results = [];
+	var promises = tags.map((tag) => {
+		return Tag.find({ name: tag.name }, (err, doc) => {
+			if (err) {
+				return res.status(500).json({
+					success: false,
+					reason: "Error while trying to find tag in the database.",
+					error: err,
+				});
+			} else if (doc && doc.length > 0) {
+				tag_results.push(doc[0]);
+			} else {
+				// if tag does not exist, create it..
+				const new_tag = new Tag({
+					_id: new mongoose.Types.ObjectId(),
+					name: tag.name,
+				});
+				new_tag.save();
+				tag_results.push(new_tag);
+			}
+		});
+	});
+
+	Promise.all(promises).then(() => {
+		User.findOne({ _id: req.user_data._id }, (err, creator) => {
+			if (err) {
+				return res.status(500).json({
+					success: false,
+					reason: "Error while fetching user from database.",
+					error: error,
+				});
+			}
+			// create question
+			const question = new Question({
+				_id: new mongoose.Types.ObjectId(),
+				title: title,
+				description: description,
+				user: creator,
+				tags: tag_results,
+				answers: [],
+			});
+
+			// save question to db
+			question.save().then((result, error) => {
+				if (error) {
+					return res.status(500).json({
+						success: false,
+						reason: "Error while saving question to database.",
+						error: error,
+					});
+				}
+				return res.status(200).json({
+					success: true,
+					question: result,
+				});
+			});
+		});
+	});
+});
+
+// get all available tags
+router.get("/q/all_available_tags", auth_required, (req, res) => {
+	Tag.find({}, (error, docs) => {
+		if (error) {
+			return res.status(500).json({
+				success: false,
+				reason: "Error while fetching all available tags from database.",
+				err: error,
+			});
+		}
+		return res.status(200).json({
+			success: true,
+			tags: docs,
+		});
+	});
+});
+
+// fetch question details
+router.get("/q/get_question_details/:id", (req, res) => {
+	if (!req.params.id || req.params.id === "" || req.params.id === "null" || req.params.id === "undefined") {
+		return res.status(500).json({ success: false, reason: "No id provided." });
+	}
+	Question.findOne({ _id: req.params.id }, (err, doc) => {
+		if (err) {
+			return res.status(500).json({ success: false, reason: "Error while fetching question from db.", error: err });
+		} else if (!doc) {
+			return res.status(404).json({ success: false, reason: "Question with that id not found" });
+		} else {
+			return res.status(200).json({ success: true, question: doc });
+		}
+	});
+});
+
+// add answer to question
+router.post("/a/add_answer_to_question", auth_required, (req, res) => {
+	const { question_id, answer } = req.body;
+
+	// find user that created an answer
+	User.findOne({ _id: req.user_data._id }, (err, creator) => {
+		if (err) {
+			return res.status(500).json({
+				success: false,
+				reason: "Error while fetching user from database.",
+				error: error,
+			});
+		}
+
+		// instantiate new answer
+		const new_answer = new Answer({
+			_id: new mongoose.Types.ObjectId(),
+			value: answer,
+			accepted: false,
+			question_id: question_id,
+			user: creator,
+		});
+
+		// save answer to db
+		new_answer.save().then((result, err1) => {
+			if (err1) {
+				return res.status(500).json({ success: false, reason: "Error occured while trying to save answer to database." });
+			}
+			Question.updateOne(
+				{
+					_id: question_id,
+				},
+				{ $push: { answers: result } },
+				(qerr, qres) => {
+					if (qerr) {
+						return res.status(500).json({ success: false, reason: "Error occured while trying to update question in the database." });
+					}
+					return res.status(200).json({ success: true, question: qres });
+				},
+			);
+		});
+	});
+});
+
+// accept answer
+router.post("/a/accept_answer/", auth_required, (req, res) => {
+	const { answer } = req.body;
+	// find the question
+	Question.findOne({ _id: answer.question_id }, (question_err, question_doc) => {
+		if (question_err) {
+			return res.status(500).json({ success: false, reason: "Error occured while trying to find question in the database." });
+		} else if (!question_doc) {
+			return res.status(404).json({ success: false, reason: "Question with that id does not exist." });
+		} else if (question_doc.user._id.toString() !== req.user_data._id) {
+			return res.status(403).json({ success: false, reason: "Only the question owner can accept answers." });
+		} else {
+			// first set all to false
+			Answer.updateMany({ question_id: question_doc._id }, { accepted: false }, (answer1_err, answer1_doc) => {
+				if (answer1_err) {
+					return res.status(500).json({ success: false, reason: "Error occured while trying to update answers." });
+				}
+				// then set that one to true
+				Answer.findOneAndUpdate({ _id: answer._id }, { accepted: true }, null, (answer_err, answer_doc) => {
+					if (answer_err) {
+						return res.status(500).json({ success: false, reason: "Error occured while trying to update answer." });
+					}
+					// then pull all answers
+					Answer.find({ question_id: question_doc._id }, (answer2_err, answer2_doc) => {
+						if (answer2_err) {
+							return res.status(500).json({ success: false, reason: "Error occured while trying to update answer." });
+						}
+						// update question
+						Question.findOneAndUpdate({ _id: answer.question_id }, { answers: answer2_doc }, (question1_err, question1_doc) => {
+							return res.status(200).json({ success: true, question: question1_doc });
+						});
+					});
+				});
+			});
+		}
+	});
+});
+
+// add comment to answer
+router.post("/c/add_comment_to_answer", auth_required, (req, res) => {
+	const { answer_id, comment_value, question_id } = req.body;
+
+	User.findOne({ _id: req.user_data._id }, (err, creator) => {
+		const new_comment = new Comment({
+			_id: new mongoose.Types.ObjectId(),
+			value: comment_value,
+			user: creator,
+		});
+		new_comment.save().then((result, error) => {
+			if (error) {
+				return res.status(500).json({ success: false, reason: "Error occured while trying to save comment." });
+			}
+			Answer.updateOne(
+				{
+					_id: answer_id,
+				},
+				{ $push: { comments: new_comment } },
+				(err, res1) => {
+					if (err) {
+						return res.status(500).json({ success: false, reason: "Error occured while trying to update answers in the database." });
+					}
+					Answer.find({ question_id: question_id }, (err, doc) => {
+						if (err) {
+							return res.status(500).json({ success: false, reason: "Error occured while trying to update questions." });
+						}
+						Question.findOneAndUpdate({ _id: question_id }, { answers: doc }, (err, doc) => {
+							res.status(200).json({ success: true });
+						});
+					});
+				},
+			);
+		});
+	});
+	Answer.findOneAndUpdate({ _id: answer_id });
+});
 
 module.exports = router;

@@ -11,6 +11,7 @@ import {
 	FETCH_CURRENT_USER_LOADING,
 	FETCH_CURRENT_USER_SUCCESS,
 	FETCH_CURRENT_USER_ERR,
+	AUTH_REDUX_RESET,
 } from "../types/AuthTypes";
 
 export const fetch_current_user = (cb) => {
@@ -38,6 +39,7 @@ export const register_user = (userdata, browser_history = null) => {
 			})
 			.then((res) => {
 				dispatch({ type: USER_SIGN_UP_SUCCESS, payload: res.data });
+				browser_history.push("/sign_in?sign_up_successfull=true");
 			})
 			.catch((err) => {
 				console.error(err);
@@ -54,6 +56,7 @@ export const sign_in_user = (userdata) => {
 				userdata,
 			})
 			.then((res) => {
+                axios.defaults.headers.common.authorization = `Bearer ${res.data.token}`;
 				localStorage.setItem("token", res.data.token);
 				const token_decoded = jwt_decode(res.data.token);
 				localStorage.setItem("user", JSON.stringify(token_decoded));
@@ -69,7 +72,7 @@ export const sign_in_user = (userdata) => {
 
 export const reset_auth_reducer_to_init = () => {
 	return (dispatch) => {
-		dispatch({ type: "AUTH_REDUX_RESET" });
+		dispatch({ type: AUTH_REDUX_RESET });
 	};
 };
 

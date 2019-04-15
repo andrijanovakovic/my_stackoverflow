@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Redirect } from "react-router-dom";
+import { Route, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
@@ -31,4 +31,14 @@ const mapStateToProps = (state) => {
 	};
 };
 
-export default connect(mapStateToProps)(PrivateRoute);
+// export default connect(mapStateToProps)(PrivateRoute);
+
+// const mapDispatchToProps = { register_user, create_question, get_all_available_tags };
+
+const PrivateRouteCon = withRouter(
+	connect(
+		mapStateToProps,
+		// mapDispatchToProps,
+	)(PrivateRoute),
+);
+export default PrivateRouteCon;

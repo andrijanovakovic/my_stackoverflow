@@ -9,6 +9,7 @@ import {
 	FETCH_CURRENT_USER_LOADING,
 	FETCH_CURRENT_USER_SUCCESS,
 	FETCH_CURRENT_USER_ERR,
+	AUTH_REDUX_RESET,
 } from "../types/AuthTypes";
 
 let initialState = {
@@ -43,7 +44,7 @@ export default function(state = initialState, action) {
 			return { ...state, user_sign_in_loading: false, user_sign_in_data: [], user_sign_in_error: action.payload };
 		case AUTHENTICATE_USER:
 			return { ...state, user_authenticated: true };
-		case "AUTH_REDUX_RESET":
+		case AUTH_REDUX_RESET:
 			return initialState;
 
 		case FETCH_CURRENT_USER_LOADING:

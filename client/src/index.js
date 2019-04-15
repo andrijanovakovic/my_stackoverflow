@@ -11,6 +11,7 @@ import axios from "axios";
 import { AUTHENTICATE_USER } from "./types/AuthTypes";
 import jwt_decode from "jwt-decode";
 import { reset_auth_reducer_to_init } from "./actions/AuthActions";
+import { reset_core_reducer_to_init } from "./actions/CoreActions";
 
 const store = createStore(CombinedReducers, {}, applyMiddleware(reduxThunk));
 
@@ -18,7 +19,7 @@ const token = localStorage.getItem("token");
 
 // set axios defaults
 axios.defaults.headers.post["Content-Type"] = "appication/json";
-if (token && token !== "" && token !== "null") {
+if (token) {
 	axios.defaults.headers.common.authorization = `Bearer ${token}`;
 	store.dispatch({ type: AUTHENTICATE_USER, payload: jwt_decode(token) });
 }
@@ -30,6 +31,7 @@ axios.interceptors.response.use(
 		if (error.response && error.response.status && error.response.status === 401) {
 			localStorage.clear();
 			store.dispatch(reset_auth_reducer_to_init());
+			store.dispatch(reset_core_reducer_to_init());
 		}
 		return Promise.reject(error);
 	},

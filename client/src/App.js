@@ -14,6 +14,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import { ToastContainer } from "react-toastify";
 import { fetch_current_user } from "./actions/AuthActions";
 import PropTypes from "prop-types";
+import QuestionView from "./components/QuestionView";
 
 class App extends Component {
 	componentDidMount() {
@@ -71,6 +72,7 @@ class App extends Component {
 						<Route path="/sign_in/" exact component={SignIn} />
 						<Route path="/sign_up/" exact component={SignUp} />
 						<PrivateRoute auth={this.props.user_authenticated} path="/create_question/" component={CreateQuestion} />
+						<Route path="/q/:id" exact component={QuestionView} />
 						<PrivateRoute auth={this.props.user_authenticated} path="/my_questions/" exact component={MyQuestions} />
 						<PrivateRoute auth={this.props.user_authenticated} path="/sign_out/" exact component={SignOut} />
 					</div>

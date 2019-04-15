@@ -37,7 +37,9 @@ class SignIn extends Component {
 				formErrors.data = nextProps.user_sign_in_data.reason;
 				this.setState({ formErrors });
 			} else {
-				this.setState({ redirectToReferrer: true });
+				if (nextProps.user_sign_in_data.success === true && nextProps.user_authenticated) {
+					this.setState({ redirectToReferrer: true });
+				}
 			}
 		}
 	}
@@ -74,7 +76,10 @@ class SignIn extends Component {
 			from: { pathname: "/" },
 		};
 		let { redirectToReferrer } = this.state;
-		if (redirectToReferrer) return <Redirect to={from ? from : { pathname: "/" }} />;
+		if (redirectToReferrer) {
+			console.log("redirecting to", from);
+			return <Redirect to={from ? from : { pathname: "/" }} />;
+		}
 		return (
 			<div>
 				<Jumbotron>
