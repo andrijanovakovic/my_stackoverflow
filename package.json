@@ -4,7 +4,7 @@
 	"private": false,
 	"license": "UNLICENSED",
 	"scripts": {
-		"start:dev": "concurrently \"cross-env NODE_ENV=development nodemon ./bin/www\" \"yarn --cwd client dev\"",
+		"start:dev": "concurrently \"cross-env-shell NODE_ENV=development nodemon ./bin/www\" \"yarn --cwd client dev\"",
 		"dev": "yarn start:dev"
 	},
 	"dependencies": {
